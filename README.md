@@ -2,7 +2,7 @@
 
 ## Core Approach
 - Residual Nets used as the feature extraction block.
-- Weighted \(R^2\) score on 53% test set in competition submission: **0.46**.
+- Weighted $R^2$ score on 53% test set in competition submission: **0.46**.
 - Applied **L1 and L2 regularization** to reduce overfitting.
 
 ---
@@ -19,9 +19,9 @@
 ## 1. Full Data Training (No Preprocessing)
 Full training performed without any preprocessing steps.
 
-### Model Performance (Weighted \(R^2\))
+### Model Performance (Weighted $R^2$)
 
-| Model                                  | Configuration                   | Weighted \(R^2\) |
+| Model                                  | Configuration                   | Weighted $R^2$ |
 |----------------------------------------|----------------------------------|-------------------|
 | DinoV2-Basic (Image Regression)        | Visual-only regression           | 0.46              |
 | ResNet50 (Masked Tabular Fusion)       | Image + masked tabular fusion    | 0.56              |
