@@ -1,7 +1,6 @@
 # Method
 
 ## Core Approach
-- Residual Nets used as the feature extraction block.
 - Weighted $R^2$ score on 53% test set in competition submission: **0.46**.
 - Applied **L1 and L2 regularization** to reduce overfitting.
 
