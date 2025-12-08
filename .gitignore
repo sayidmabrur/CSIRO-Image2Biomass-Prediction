@@ -1,2 +1,8 @@
 .venv
 .ipynb_checkpoints
+
+dinov2/
+wandb/
+
+
+image2biomass_weights_resnet50.pth
