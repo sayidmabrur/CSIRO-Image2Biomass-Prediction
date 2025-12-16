@@ -25,11 +25,6 @@ class Image2BiomassModel(nn.Module):
             pretrained_model_path: Path to pretrained DINOv3 ConvNeXt Large model weights
         """
         super().__init__()
-
-        # Default path if not provided
-        if pretrained_model_path is None:
-            pretrained_model_path = "/mnt/d/Sayid/Projects/Image2Biomass/CSIRO-Image2Biomass-Prediction/pretrained/dinov3-convnext-large/weights"
-
         # Load DINOv3 ConvNeXt Large backbone
         self.backbone = AutoModel.from_pretrained(
             pretrained_model_path, trust_remote_code=False
@@ -39,9 +34,11 @@ class Image2BiomassModel(nn.Module):
         for param in self.backbone.parameters():
             param.requires_grad = False
 
-        # DINOv3 ConvNeXt Large outputs 1536-dim features (from the pooler)
+        # DINOv3 ConvNeXt outputs features from pooler
+        # Tiny model = 768 dims, Large model = 1536 dims
+        # The actual dimension depends on which model is loaded
         self.fc1 = nn.Sequential(
-            nn.Linear(1536, 1024),
+            nn.Linear(768, 1024),  # Changed from 1536 to 768 for ConvNeXt Tiny
             nn.BatchNorm1d(1024),
             nn.Mish(),
             nn.Dropout(0.1),

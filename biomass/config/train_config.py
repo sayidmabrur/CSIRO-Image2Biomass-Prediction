@@ -11,17 +11,17 @@ class TrainingConfig:
     """Configuration for training the Image2Biomass model."""
 
     # ========== Data Paths ==========
-    dataset_path: str = "/kaggle/working/csiro-biomass/"
+    dataset_path: str = "datasets"
     """Path to the dataset directory containing train.csv and images"""
 
     output_dir: str = "train_results"
     """Directory to save training outputs (models, logs, etc.)"""
 
-    pretrained_model_path: str = "/mnt/d/Sayid/Projects/Image2Biomass/CSIRO-Image2Biomass-Prediction/pretrained/dinov3-convnext-large/weights"
+    pretrained_model_path: str = "pretrained/dinov3-convnext-tiny-pretrain-lvd1689m"
     """Path to pretrained DINOv3 ConvNeXt Large model weights"""
 
     # ========== Training Hyperparameters ==========
-    epochs: int = 1000
+    epochs: int = 100
     """Number of training epochs"""
 
     batch_size: int = 8

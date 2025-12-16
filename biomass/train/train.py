@@ -198,7 +198,7 @@ def train_fold(
     set_seed(config.seed + fold_idx)
 
     # Create datasets for this fold with proper transforms
-    print("📊 Creating train dataset for this fold...")
+    print("Creating train dataset for this fold...")
     train_dataset_fold = Image2BioMassTrainValDataset(
         dataset_path=config.dataset_path,
         indices=train_indices,
@@ -210,7 +210,7 @@ def train_fold(
         numeric_stats=base_dataset.numeric_stats,
     )
 
-    print("📊 Creating validation dataset for this fold...")
+    print("Creating validation dataset for this fold...")
     val_dataset_fold = Image2BioMassTrainValDataset(
         dataset_path=config.dataset_path,
         indices=val_indices,
@@ -249,16 +249,16 @@ def train_fold(
     print(f"Val batches: {len(val_dataloader)}")
 
     # Initialize NEW model for this fold (critical for K-Fold!)
-    print("🔧 Loading backbone model (DINOv3 ConvNeXt Large)...")
+    print("Loading backbone model (DINOv3 ConvNeXt Large)...")
     model = Image2BiomassModel(config.pretrained_model_path).to(device)
     print("Model loaded and moved to device")
-    print("⚙️  Initializing optimizer...")
+    print("Initializing optimizer...")
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay
     )
 
     # Initialize W&B for this fold if enabled
-    print(f"📝 W&B logging: {'enabled' if config.use_wandb else 'disabled'}")
+    print(f"W&B logging: {'enabled' if config.use_wandb else 'disabled'}")
     if config.use_wandb:
         _ = wandb.init(
             project=config.wandb_project,
@@ -303,7 +303,7 @@ def train_fold(
     fold_start_time = time.time()
 
     # Training loop for this fold
-    print(f"\n🚀 Starting training loop for {config.epochs} epochs...\n")
+    print(f"\nStarting training loop for {config.epochs} epochs...\n")
     for epoch in range(1, config.epochs + 1):
         epoch_start_time = time.time()
 
@@ -444,7 +444,7 @@ def run_cross_validation(config: TrainingConfig):
     """
     # Setup device
     device = torch.device(config.device if torch.cuda.is_available() else "cpu")
-    print(f"\n🖥️  Using device: {device}")
+    print(f"\nUsing device: {device}")
 
     # Create results directory
     os.makedirs(config.output_dir, exist_ok=True)
@@ -461,7 +461,7 @@ def run_cross_validation(config: TrainingConfig):
     weights = torch.tensor([0.1, 0.1, 0.1, 0.2, 0.5], device=device)
 
     # Create base dataset to get full DataFrame and encoders
-    print("\n📂 Loading base dataset...")
+    print("\nLoading base dataset...")
     base_dataset = Image2BioMassTrainValDataset(
         dataset_path=config.dataset_path,
         img_transform=None,
@@ -470,13 +470,13 @@ def run_cross_validation(config: TrainingConfig):
     )
 
     print("Base dataset loaded")
-    print(f"\n📊 Dataset Info:")
+    print(f"\nDataset Info:")
     print(f"  Total samples: {len(base_dataset)}")
     print(f"  K-Fold Cross Validation: {config.n_folds} folds")
     print(f"  ~{len(base_dataset) // config.n_folds} validation samples per fold")
 
     # Setup K-Fold Cross Validation
-    print("\n🔀 Creating K-fold splits...")
+    print("\nCreating K-fold splits...")
     kfold = KFold(n_splits=config.n_folds, shuffle=True, random_state=config.seed)
     fold_splits = list(kfold.split(range(len(base_dataset))))
 

@@ -13,3 +13,7 @@ image2biomass_weights_resnet50.pth
 pretrained/
 
 datasets/
+
+__pycache__/
+
+train_results/
