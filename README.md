@@ -34,3 +34,7 @@ Full training performed without any preprocessing steps.
 2. Removed outliers detected using the **Interquartile Range (IQR)** method.  
 
 ---
+# Training command
+
+```python main.py --n-folds 2 --epochs 5 --use-wandb true```
+
