@@ -251,7 +251,7 @@ def train_fold(
     # Initialize NEW model for this fold (critical for K-Fold!)
     print("🔧 Loading backbone model (DINOv3 ConvNeXt Large)...")
     model = Image2BiomassModel(config.pretrained_model_path).to(device)
-    print("✓ Model loaded and moved to device")
+    print("Model loaded and moved to device")
     print("⚙️  Initializing optimizer...")
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay
@@ -333,7 +333,7 @@ def train_fold(
             best_model_path = f"{fold_dir}/best.pth"
             torch.save(model.state_dict(), best_model_path)
             is_best = True
-            print(f"✓ New best model saved! Val R2: {best_val_r2:.4f} at epoch {epoch}")
+            print(f"New best model saved! Val R2: {best_val_r2:.4f} at epoch {epoch}")
 
         # Log to W&B if enabled
         if config.use_wandb:
@@ -469,7 +469,7 @@ def run_cross_validation(config: TrainingConfig):
         target_transform=None,
     )
 
-    print("✓ Base dataset loaded")
+    print("Base dataset loaded")
     print(f"\n📊 Dataset Info:")
     print(f"  Total samples: {len(base_dataset)}")
     print(f"  K-Fold Cross Validation: {config.n_folds} folds")

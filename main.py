@@ -47,7 +47,7 @@ def main(config: TrainingConfig):
     # Run cross-validation training
     results = run_cross_validation(config)
 
-    print("\n✓ Training completed successfully!")
+    print("\nTraining completed successfully!")
     return results
 
 
