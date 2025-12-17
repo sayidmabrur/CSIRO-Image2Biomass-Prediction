@@ -17,3 +17,5 @@ datasets/
 __pycache__/
 
 train_results/
+
+.env

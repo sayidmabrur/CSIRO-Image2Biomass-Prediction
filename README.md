@@ -36,5 +36,5 @@ Full training performed without any preprocessing steps.
 ---
 # Training command
 
-```python main.py --n-folds 2 --epochs 5 --use-wandb true```
+```python main.py --n-folds 2 --epochs 50 --wandb-api-key API_KEY```
 

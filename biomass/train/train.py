@@ -24,8 +24,8 @@ from ..data import (
     numeric_transform,
     target_transform,
 )
-from ..eval.metrics import weighted_r2, weighted_r2_single
-from ..base_model import Image2BiomassModel
+from biomass.eval.metrics import weighted_r2, weighted_r2_single
+from biomass.base_model import Image2BiomassModel
 
 
 def set_seed(seed: int = 42):
@@ -86,12 +86,14 @@ def train_one_epoch(
         dataloader, desc=f"[Fold {fold_idx + 1}] Train Epoch {epoch}", leave=False
     ):
         imgs, y = imgs.to(device), y.to(device)
+        # print("y:", y)
 
         preds, loss = model(imgs, y)
 
+        # huber loss already applied L1 regularization
         # L1 regularization
-        reg_loss = sum(param.abs().sum() for param in model.parameters())
-        loss = loss + config.l1_lambda * reg_loss
+        # reg_loss = sum(param.abs().sum() for param in model.parameters())
+        # loss = loss + config.l1_lambda * reg_loss
 
         optimizer.zero_grad()
         loss.backward()

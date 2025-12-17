@@ -7,6 +7,28 @@ import torch.nn as nn
 from transformers import AutoModel
 
 
+class WeightedHuberLoss(nn.Module):
+    """Weighted Huber Loss for biomass prediction."""
+
+    def __init__(self, delta=1.0):
+        super().__init__()
+        self.delta = delta
+        # Weights: [Dry_Green_g, Dry_Dead_g, Dry_Clover_g, GDM_g, Dry_Total_g]
+        self.register_buffer(
+            "weights", torch.tensor([0.1, 0.1, 0.1, 0.2, 0.5], dtype=torch.float32)
+        )
+
+    def forward(self, x, y):
+        # Only use first 3 weights if predicting 3 targets
+        w = self.weights[: x.shape[-1]]
+        loss = torch.where(
+            torch.abs(y - x) < self.delta,
+            0.5 * (y - x) ** 2,
+            self.delta * (torch.abs(y - x) - 0.5 * self.delta),
+        )
+        return (loss * w).mean()
+
+
 class Image2BiomassModel(nn.Module):
     """
     Image to Biomass prediction model using DINOv3 ConvNeXt Large backbone.
@@ -38,7 +60,7 @@ class Image2BiomassModel(nn.Module):
         # Tiny model = 768 dims, Large model = 1536 dims
         # The actual dimension depends on which model is loaded
         self.fc1 = nn.Sequential(
-            nn.Linear(768, 1024),  # Changed from 1536 to 768 for ConvNeXt Tiny
+            nn.Linear(768, 1024),
             nn.BatchNorm1d(1024),
             nn.Mish(),
             nn.Dropout(0.1),
@@ -57,12 +79,16 @@ class Image2BiomassModel(nn.Module):
             nn.Linear(128, 64),
             nn.BatchNorm1d(64),
             nn.Mish(),
+            nn.Linear(64, 32),
+            nn.BatchNorm1d(32),
+            nn.Mish(),
             nn.Dropout(0.1),
         )
 
-        self.out = nn.Linear(64, 3)
+        self.out = nn.Linear(32, 5)
 
-        self.criterion = nn.SmoothL1Loss(reduction="mean")
+        # self.criterion = nn.SmoothL1Loss(reduction="mean")
+        self.criterion = WeightedHuberLoss(delta=1.0)
 
     def forward(self, x, y=None):
         """

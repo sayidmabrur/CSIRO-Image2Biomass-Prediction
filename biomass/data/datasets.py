@@ -76,7 +76,7 @@ class Image2BioMassTrainValDataset(Dataset):
         if indices is not None:
             self.df = self.df.iloc[indices].reset_index(drop=True)
 
-        self.targets = self.df[["Dry_Green_g", "Dry_Dead_g", "Dry_Clover_g"]].values
+        self.targets = self.df[["Dry_Green_g", "Dry_Dead_g", "Dry_Clover_g", "GDM_g", "Dry_Total_g"]].values
 
     def _process_df(self):
         """
