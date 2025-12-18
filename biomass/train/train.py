@@ -49,6 +49,7 @@ def train_one_epoch(
     model,
     dataloader,
     optimizer,
+    scheduler,
     device,
     weights,
     config: TrainingConfig,
@@ -99,6 +100,8 @@ def train_one_epoch(
         loss.backward()
         clip_grad_norm_(model.parameters(), max_norm=config.grad_clip_norm)
         optimizer.step()
+        if scheduler:
+            scheduler.step()
 
         train_loss += loss.item()
         train_r2_scores.append(weighted_r2(y, preds, weights).item())
@@ -259,12 +262,24 @@ def train_fold(
         model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay
     )
 
+    print("Initializing scheduler...")
+    if config.scheduler == "cosine":
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=config.epochs
+        )
+    elif config.scheduler == "step":
+        scheduler = torch.optim.lr_scheduler.StepLR(
+            optimizer, step_size=config.epochs // 2, gamma=0.1
+        )
+    else:
+        scheduler = None
+
     # Initialize W&B for this fold if enabled
     print(f"W&B logging: {'enabled' if config.use_wandb else 'disabled'}")
     if config.use_wandb:
         _ = wandb.init(
             project=config.wandb_project,
-            name=f"fold{fold_idx + 1}_dinov3-convnext-large",
+            name=f"fold{fold_idx + 1}_{config.architecture}",
             group=config.wandb_group,
             job_type=f"fold{fold_idx + 1}",
             tags=[
@@ -311,7 +326,15 @@ def train_fold(
 
         # Train
         avg_train_loss, avg_train_r2, avg_train_r2_individual = train_one_epoch(
-            model, train_dataloader, optimizer, device, weights, config, epoch, fold_idx
+            model,
+            train_dataloader,
+            optimizer,
+            scheduler,
+            device,
+            weights,
+            config,
+            epoch,
+            fold_idx,
         )
 
         # Validate

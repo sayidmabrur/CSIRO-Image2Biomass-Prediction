@@ -17,14 +17,18 @@ class TrainingConfig:
     output_dir: str = "train_results"
     """Directory to save training outputs (models, logs, etc.)"""
 
-    pretrained_model_path: str = "pretrained/dinov3-convnext-tiny-pretrain-lvd1689m"
+    # architecture: str = "dinov3-convnext-tiny-pretrain-lvd1689m"
+    architecture: str = "dinov3-convnext-large-pretrain-lvd1689m"
+    """Pretrained model architecture"""
+
+    pretrained_model_path: str = "pretrained/dinov3-convnext-large-pretrain-lvd1689m"
     """Path to pretrained DINOv3 ConvNeXt Large model weights"""
 
     # ========== Training Hyperparameters ==========
     epochs: int = 100
     """Number of training epochs"""
 
-    batch_size: int = 8
+    batch_size: int = 16
     """Batch size for training and validation"""
 
     learning_rate: float = 1e-4
@@ -78,3 +82,5 @@ class TrainingConfig:
 
     log_freq: int = 100
     """Frequency for W&B gradient logging"""
+
+    scheduler: str = "cosine"

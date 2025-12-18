@@ -60,11 +60,8 @@ class Image2BiomassModel(nn.Module):
         # Tiny model = 768 dims, Large model = 1536 dims
         # The actual dimension depends on which model is loaded
         self.fc1 = nn.Sequential(
-            nn.Linear(768, 1024),
-            nn.BatchNorm1d(1024),
-            nn.Mish(),
-            nn.Dropout(0.1),
-            nn.Linear(1024, 512),
+            nn.Linear(1536, 512),  # dinov3 convnext large
+            # nn.Linear(768, 512), # dinov3 convenext tiny
             nn.BatchNorm1d(512),
             nn.Mish(),
             nn.Dropout(0.1),
@@ -79,13 +76,10 @@ class Image2BiomassModel(nn.Module):
             nn.Linear(128, 64),
             nn.BatchNorm1d(64),
             nn.Mish(),
-            nn.Linear(64, 32),
-            nn.BatchNorm1d(32),
-            nn.Mish(),
             nn.Dropout(0.1),
         )
 
-        self.out = nn.Linear(32, 5)
+        self.out = nn.Linear(64, 5)
 
         # self.criterion = nn.SmoothL1Loss(reduction="mean")
         self.criterion = WeightedHuberLoss(delta=1.0)

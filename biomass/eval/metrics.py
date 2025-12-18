@@ -42,18 +42,6 @@ def weighted_r2(
     y_true = target_untransform(y_true)
     y_pred = target_untransform(y_pred)
 
-    # create new columns: GDM = Green + Clover, Total = Green + Dead + Clover
-    # y_true structure: 0: Green, 1: Dead, 2: Clover
-    gdm = (y_true[:, 0] + y_true[:, 2]).unsqueeze(1)  # (batch, 1)
-    tot = (y_true[:, 0] + y_true[:, 1] + y_true[:, 2]).unsqueeze(1)
-
-    gdm_pred = (y_pred[:, 0] + y_pred[:, 2]).unsqueeze(1)  # (batch, 1)
-    tot_pred = (y_pred[:, 0] + y_pred[:, 1] + y_pred[:, 2]).unsqueeze(1)
-
-    # append columns
-    y_true = torch.cat([y_true, gdm, tot], dim=1)
-    y_pred = torch.cat([y_pred, gdm_pred, tot_pred], dim=1)
-
     # compute weighted R2
     mean = y_true.mean(dim=0)
     SSE = ((y_true - y_pred) ** 2).sum(dim=0)
