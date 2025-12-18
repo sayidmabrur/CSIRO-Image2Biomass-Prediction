@@ -100,8 +100,6 @@ def train_one_epoch(
         loss.backward()
         clip_grad_norm_(model.parameters(), max_norm=config.grad_clip_norm)
         optimizer.step()
-        if scheduler:
-            scheduler.step()
 
         train_loss += loss.item()
         train_r2_scores.append(weighted_r2(y, preds, weights).item())
@@ -341,6 +339,10 @@ def train_fold(
         avg_val_loss, avg_val_r2, avg_val_r2_individual = validate_one_epoch(
             model, val_dataloader, device, weights, epoch, fold_idx
         )
+
+        # Step scheduler once per epoch
+        if scheduler:
+            scheduler.step()
 
         val_losses.append(avg_val_loss)
         train_losses.append(avg_train_loss)

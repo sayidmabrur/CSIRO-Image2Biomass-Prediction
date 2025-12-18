@@ -42,6 +42,7 @@ def main(config: TrainingConfig):
     print(f"  K-Folds: {config.n_folds}")
     print(f"  Device: {config.device}")
     print(f"  W&B enabled: {config.use_wandb}")
+    print(f"  LR Scheduler: {config.scheduler}")
     print("=" * 80 + "\n")
 
     # Run cross-validation training

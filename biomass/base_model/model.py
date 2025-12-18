@@ -60,8 +60,12 @@ class Image2BiomassModel(nn.Module):
         # Tiny model = 768 dims, Large model = 1536 dims
         # The actual dimension depends on which model is loaded
         self.fc1 = nn.Sequential(
-            nn.Linear(1536, 512),  # dinov3 convnext large
+            nn.Linear(1536, 1024),  # dinov3 convnext large
             # nn.Linear(768, 512), # dinov3 convenext tiny
+            nn.BatchNorm1d(1024),
+            nn.Mish(),
+            nn.Dropout(0.1),
+            nn.Linear(1024, 512),
             nn.BatchNorm1d(512),
             nn.Mish(),
             nn.Dropout(0.1),
@@ -78,6 +82,7 @@ class Image2BiomassModel(nn.Module):
             nn.Mish(),
             nn.Dropout(0.1),
         )
+
 
         self.out = nn.Linear(64, 5)
 
