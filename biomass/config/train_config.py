@@ -84,3 +84,5 @@ class TrainingConfig:
     """Frequency for W&B gradient logging"""
 
     scheduler: str = "cosine"
+
+    groups_fold_name: str = "Species"

@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision.io import decode_image
 from torchvision.transforms import v2
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import KFold
+from sklearn.model_selection import GroupKFold
 from .config import DataConfig
 
 
@@ -304,29 +304,19 @@ class Image2BioMassTestDataset(Dataset):
 
 def create_kfold_datasets(
     dataset_path,
-    fold_idx,
-    train_transform,
-    val_transform,
-    numeric_transform=None,
-    target_transform=None,
     n_folds=5,
-    random_seed=42,
+    groups_col_name="Species",
 ):
     """
-    Create train and validation datasets for a specific fold.
+    Create K-fold splits using GroupKFold to prevent data leakage.
 
     Args:
         dataset_path: Path to dataset directory
-        fold_idx: Which fold to use (0-indexed)
-        train_transform: Transform for training data
-        val_transform: Transform for validation data
-        numeric_transform: Function to normalize numeric features
-        target_transform: Transform for targets
         n_folds: Number of folds for cross-validation
-        random_seed: Random seed for reproducibility
+        groups_col_name: Column name to use for grouping (prevents same group in train and val)
 
     Returns:
-        Tuple of (train_dataset, val_dataset)
+        Tuple of (fold_splits, base_dataset)
     """
     # Create base dataset to get full DataFrame and encoders
     base_dataset = Image2BioMassTrainValDataset(
@@ -336,40 +326,14 @@ def create_kfold_datasets(
         target_transform=None,
     )
 
-    # Setup K-Fold Cross Validation
-    kfold = KFold(n_splits=n_folds, shuffle=True, random_state=random_seed)
-    fold_splits = list(kfold.split(range(len(base_dataset))))
+    # Get groups for GroupKFold
+    groups = base_dataset.df[groups_col_name].values
 
-    if fold_idx >= len(fold_splits):
-        raise ValueError(f"fold_idx {fold_idx} is out of range for {n_folds} folds")
-
-    train_idx, val_idx = fold_splits[fold_idx]
-
-    # Create train dataset
-    train_dataset = Image2BioMassTrainValDataset(
-        dataset_path=dataset_path,
-        indices=train_idx,
-        img_transform=train_transform,
-        numeric_transform=numeric_transform,
-        target_transform=target_transform,
-        df=base_dataset.df,
-        label_encoders=base_dataset.get_label_encoders(),
-        numeric_stats=base_dataset.numeric_stats,
-    )
-
-    # Create validation dataset
-    val_dataset = Image2BioMassTrainValDataset(
-        dataset_path=dataset_path,
-        indices=val_idx,
-        img_transform=val_transform,
-        numeric_transform=numeric_transform,
-        target_transform=target_transform,
-        df=base_dataset.df,
-        label_encoders=base_dataset.get_label_encoders(),
-        numeric_stats=base_dataset.numeric_stats,
-    )
-
-    return train_dataset, val_dataset
+    # Setup K-Fold Cross Validation with groups
+    # GroupKFold doesn't have shuffle or random_state - it splits by groups
+    kfold = GroupKFold(n_splits=n_folds)
+    fold_splits = list(kfold.split(range(len(base_dataset)), groups=groups))
+    return fold_splits, base_dataset
 
 
 def create_dataloaders(

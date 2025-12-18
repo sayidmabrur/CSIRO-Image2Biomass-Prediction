@@ -12,12 +12,12 @@ import numpy as np
 import torch
 import wandb
 from torch.nn.utils import clip_grad_norm_
-from torch.utils.data import DataLoader
 from tqdm import tqdm
-from sklearn.model_selection import KFold
 
-from ..config.train_config import TrainingConfig
-from ..data import (
+from biomass.data.datasets import create_kfold_datasets, create_dataloaders
+
+from biomass.config.train_config import TrainingConfig
+from biomass.data import (
     Image2BioMassTrainValDataset,
     train_transform,
     val_transform,
@@ -49,7 +49,6 @@ def train_one_epoch(
     model,
     dataloader,
     optimizer,
-    scheduler,
     device,
     weights,
     config: TrainingConfig,
@@ -229,21 +228,10 @@ def train_fold(
     g = torch.Generator()
     g.manual_seed(config.seed)
 
-    # Create dataloaders for this fold
-    train_dataloader = DataLoader(
+    train_dataloader, val_dataloader = create_dataloaders(
         train_dataset_fold,
-        batch_size=config.batch_size,
-        shuffle=True,
-        generator=g,
-        num_workers=config.num_workers,
-        pin_memory=config.pin_memory,
-        drop_last=config.drop_last,
-    )
-
-    val_dataloader = DataLoader(
         val_dataset_fold,
-        batch_size=config.batch_size,
-        shuffle=False,
+        config.batch_size,
         num_workers=config.num_workers,
         pin_memory=config.pin_memory,
     )
@@ -327,7 +315,6 @@ def train_fold(
             model,
             train_dataloader,
             optimizer,
-            scheduler,
             device,
             weights,
             config,
@@ -340,7 +327,6 @@ def train_fold(
             model, val_dataloader, device, weights, epoch, fold_idx
         )
 
-        # Step scheduler once per epoch
         if scheduler:
             scheduler.step()
 
@@ -488,24 +474,12 @@ def run_cross_validation(config: TrainingConfig):
     weights = torch.tensor([0.1, 0.1, 0.1, 0.2, 0.5], device=device)
 
     # Create base dataset to get full DataFrame and encoders
-    print("\nLoading base dataset...")
-    base_dataset = Image2BioMassTrainValDataset(
-        dataset_path=config.dataset_path,
-        img_transform=None,
-        numeric_transform=None,
-        target_transform=None,
-    )
-
-    print("Base dataset loaded")
-    print(f"\nDataset Info:")
-    print(f"  Total samples: {len(base_dataset)}")
-    print(f"  K-Fold Cross Validation: {config.n_folds} folds")
-    print(f"  ~{len(base_dataset) // config.n_folds} validation samples per fold")
-
-    # Setup K-Fold Cross Validation
     print("\nCreating K-fold splits...")
-    kfold = KFold(n_splits=config.n_folds, shuffle=True, random_state=config.seed)
-    fold_splits = list(kfold.split(range(len(base_dataset))))
+    fold_splits, base_dataset = create_kfold_datasets(
+        config.dataset_path,
+        n_folds=config.n_folds,
+        groups_col_name=config.groups_fold_name,
+    )
 
     # Verify no data leakage
     for fold_idx, (train_idx, val_idx) in enumerate(fold_splits):
