@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision.io import decode_image
 from torchvision.transforms import v2
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import GroupKFold
+from sklearn.model_selection import StratifiedKFold
 from .config import DataConfig
 
 
@@ -306,14 +306,16 @@ def create_kfold_datasets(
     dataset_path,
     n_folds=5,
     groups_col_name="Species",
+    seed=42,
 ):
     """
-    Create K-fold splits using GroupKFold to prevent data leakage.
+    Create K-fold splits using StratifiedKFold for balanced species distribution.
 
     Args:
         dataset_path: Path to dataset directory
         n_folds: Number of folds for cross-validation
-        groups_col_name: Column name to use for grouping (prevents same group in train and val)
+        groups_col_name: Column name to use for stratification (ensures proportional distribution)
+        seed: Random seed for reproducibility
 
     Returns:
         Tuple of (fold_splits, base_dataset)
@@ -326,13 +328,13 @@ def create_kfold_datasets(
         target_transform=None,
     )
 
-    # Get groups for GroupKFold
-    groups = base_dataset.df[groups_col_name].values
+    # Get stratification labels
+    stratify_labels = base_dataset.df[groups_col_name].values
 
-    # Setup K-Fold Cross Validation with groups
-    # GroupKFold doesn't have shuffle or random_state - it splits by groups
-    kfold = GroupKFold(n_splits=n_folds)
-    fold_splits = list(kfold.split(range(len(base_dataset)), groups=groups))
+    # Setup Stratified K-Fold Cross Validation
+    # StratifiedKFold ensures each fold has proportional representation of each class
+    kfold = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=seed)
+    fold_splits = list(kfold.split(range(len(base_dataset)), stratify_labels))
     return fold_splits, base_dataset
 
 
