@@ -38,3 +38,8 @@ Full training performed without any preprocessing steps.
 
 ```python main.py --n-folds 2 --epochs 50 --wandb-api-key API_KEY```
 
+
+# TODOS
+
+1. grouping K-Fold by tabular existed tabular features
+2. Added ensemble method to train dinov3 convnext + dinov3 ViT
