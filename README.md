@@ -1,9 +1,16 @@
+# Model Architecture
+
+The model consists 2 blocks of :
+- Backbone DINOV3 Convnext Large
+- MLP with swiGLU activations & RMSNorm
+
+Model training reports : https://wandb.ai/sayid-10121012-universitas-komputer-indonesia/IMAGE2BIOMASSPREDICTION
+
 # Configs
 Tunable Hyperparameters:
 - initial learning rate: 1e-2 ~ 1e-4
 - batch_size: 8/16/32
-
-- 
+ 
 # Training command
 ---
 ```python main.py --n-folds 2 --epochs 50 --wandb-api-key API_KEY```
@@ -21,12 +28,13 @@ Tunable Hyperparameters:
 - Solution: 1. Applied stratified K-Fold [TODO]
             2. Applied test-time augmentation [TODO]
 
+---
 2. High bias
 - Problem: Intuitively, the model probably has high bias, since it performs not very good. It has only 0.4 ~ 0.7 R^2 score on each fold.
 - Why: Maybe because dataset is noisy. I'm too lazy to perform preprocessing to select only high quality data or looking for more biomass dataset in the internet.
 - Solution: 1. Looking for more dataset & perform heavy preprocessing [TODO]
             2. Increase the model complexity, added ensembling method [TODO]
-
+---
 3. Low performance on predicting Dry_Dead_g
 - Problem: Data imbalance.
 - Why: The current data training, has high amount of clover & green biomass
