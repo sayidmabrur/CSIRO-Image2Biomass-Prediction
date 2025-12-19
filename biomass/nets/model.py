@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from transformers import AutoModel
 
-from biomass.nets.layers.swiglu import SwiGLU
+from biomass.nets.layers import SwiGLU, RMSNorm
 
 class WeightedHuberLoss(nn.Module):
     """Weighted Huber Loss for biomass prediction."""
@@ -65,19 +65,20 @@ class Image2BiomassModel(nn.Module):
         # DINOv3 ConvNeXt outputs features from pooler
         # Tiny model = 768 dims, Large model = 1536 dims
         # The actual dimension depends on which model is loaded
+        self.eps = 1e-8
         self.fc1 = nn.Sequential(
             SwiGLU(1536, 1024),
             nn.Dropout(0.1),
-            nn.LayerNorm(1024),
+            RMSNorm(1024, eps=self.eps),
             SwiGLU(1024, 512),
             nn.Dropout(0.1),
-            nn.LayerNorm(512),
+            RMSNorm(512, eps=self.eps),
             SwiGLU(512, 256),
             nn.Dropout(0.1),
-            nn.LayerNorm(256),
+            RMSNorm(256, eps=self.eps),
             SwiGLU(256, 128),
             nn.Dropout(0.1),
-            nn.LayerNorm(128),
+            RMSNorm(128, eps=self.eps),
             SwiGLU(128, 64),
             nn.Dropout(0.1),
         )
