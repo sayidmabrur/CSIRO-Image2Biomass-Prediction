@@ -44,7 +44,7 @@ class TrainingConfig:
     """Maximum norm for gradient clipping"""
 
     # ========== Cross-Validation ==========
-    n_folds: int = 5
+    n_folds: int = 10
     """Number of folds for K-fold cross-validation"""
 
     seed: int = 42

@@ -1,45 +1,24 @@
-# Method
-
-## Core Approach
-- Weighted $R^2$ score on 53% test set in competition submission: **0.46**.
-- Applied **L1 and L2 regularization** to reduce overfitting.
-
----
-
-# Training Configurations
-1. Applied L1 & L2 regularization to reduce overfitting.  
-2. Applied CV-Fold & Test Time Augmentation (TODO).  
-3. DinoV2 fused with masked tabular (TODO).  
-
----
-
-# Evaluation Report
-
-## 1. Full Data Training (No Preprocessing)
-Full training performed without any preprocessing steps.
-
-### Model Performance (Weighted $R^2$)
-
-| Model                                  | Configuration                   | Weighted $R^2$ |
-|----------------------------------------|----------------------------------|-------------------|
-| DinoV2-Basic (Image Regression)        | Visual-only regression           | 0.46              |
-| ResNet50 (Masked Tabular Fusion)       | Image + masked tabular fusion    | 0.56              |
-
----
-
-## 2. With Data Preprocessing
-
-### Data Preprocessing Pipeline
-1. Removed samples with mismatched **GDM_g** and **Dry_Total_g** values caused by human-entry errors.  
-2. Removed outliers detected using the **Interquartile Range (IQR)** method.  
-
----
 # Training command
-
+---
 ```python main.py --n-folds 2 --epochs 50 --wandb-api-key API_KEY```
 
 
 # TODOS
-
+---
 1. grouping K-Fold by tabular existed tabular features
 2. Added ensemble method to train dinov3 convnext + dinov3 ViT
+3. Added ensembling method Dinov3-convnext-LVD689m with Dinov3-ViT-sat493m
+
+
+# Problems & Solutions
+---
+1. High variance problem
+- Problem: The current model has high variance, the model has a good prediction in training phase, but in testing environment. It has a bad performance.
+- Why: After analyzing the data, the biomass data has unique features for each species. The current spliting method doesn't equally split the data in training & test set. And the dataset probably is too small.
+- Solution: Applied stratified K-Fold [TODO]
+
+2. High bias
+- Problem: Intuitively, the model probably has high bias, since it performs not very good. It has only 0.4 ~ 0.7 R^2 score on each fold.
+- Why: Maybe because dataset is noisy. I'm too lazy to perform preprocessing to select only high quality data or looking for more biomass dataset in the internet.
+- Solution: 1. Looking for more dataset & perform heavy preprocessing
+            2. Increase the model complexity, added ensembling method
