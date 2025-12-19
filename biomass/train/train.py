@@ -25,7 +25,7 @@ from biomass.data import (
     target_transform,
 )
 from biomass.eval.metrics import weighted_r2, weighted_r2_single
-from biomass.base_model import Image2BiomassModel
+from biomass.nn import Image2BiomassModel
 
 
 def set_seed(seed: int = 42):

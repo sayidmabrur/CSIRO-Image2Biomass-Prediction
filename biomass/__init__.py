@@ -4,7 +4,7 @@ CSIRO Biomass Training Package
 This package contains all the modules needed for training the Image2Biomass model.
 """
 
-from .base_model import Image2BiomassModel
+from .nn import Image2BiomassModel
 from .config import TrainingConfig
 from .data import (
     DataConfig,

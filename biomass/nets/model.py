@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 from transformers import AutoModel
 
+from biomass.nets.layers.swiglu import SwiGLU
 
 class WeightedHuberLoss(nn.Module):
     """Weighted Huber Loss for biomass prediction."""
@@ -33,10 +34,15 @@ class Image2BiomassModel(nn.Module):
     """
     Image to Biomass prediction model using DINOv3 ConvNeXt Large backbone.
 
-    This model predicts three biomass targets:
+    This model predicts five biomass targets:
     - Dry_Green_g
     - Dry_Dead_g
     - Dry_Clover_g
+    - GDM_g (Green Dry Matter: should equal Dry_Green_g + Dry_Clover_g)
+    - Dry_Total_g (Total Dry Matter: should equal Dry_Green_g + Dry_Dead_g + Dry_Clover_g)
+    
+    The model learns to predict all 5 targets directly, allowing it to learn the relationships
+    between component and aggregate measures in a more general way.
     """
 
     def __init__(self, pretrained_model_path: str = None):
@@ -60,26 +66,19 @@ class Image2BiomassModel(nn.Module):
         # Tiny model = 768 dims, Large model = 1536 dims
         # The actual dimension depends on which model is loaded
         self.fc1 = nn.Sequential(
-            nn.Linear(1536, 1024),  # dinov3 convnext large
-            # nn.Linear(768, 512), # dinov3 convenext tiny
-            nn.BatchNorm1d(1024),
-            nn.Mish(),
+            SwiGLU(1536, 1024),
             nn.Dropout(0.1),
-            nn.Linear(1024, 512),
-            nn.BatchNorm1d(512),
-            nn.Mish(),
+            nn.LayerNorm(1024),
+            SwiGLU(1024, 512),
             nn.Dropout(0.1),
-            nn.Linear(512, 256),
-            nn.BatchNorm1d(256),
-            nn.Mish(),
+            nn.LayerNorm(512),
+            SwiGLU(512, 256),
             nn.Dropout(0.1),
-            nn.Linear(256, 128),
-            nn.BatchNorm1d(128),
-            nn.Mish(),
+            nn.LayerNorm(256),
+            SwiGLU(256, 128),
             nn.Dropout(0.1),
-            nn.Linear(128, 64),
-            nn.BatchNorm1d(64),
-            nn.Mish(),
+            nn.LayerNorm(128),
+            SwiGLU(128, 64),
             nn.Dropout(0.1),
         )
 
@@ -95,11 +94,12 @@ class Image2BiomassModel(nn.Module):
 
         Args:
             x: Input images (B, 3, H, W)
-            y: Optional target values (B, 3) for loss calculation
+            y: Optional target values (B, 5) for loss calculation
+               [Dry_Green_g, Dry_Dead_g, Dry_Clover_g, GDM_g, Dry_Total_g]
 
         Returns:
             Tuple of (predictions, loss)
-            - predictions: (B, 3) tensor of biomass predictions
+            - predictions: (B, 5) tensor of biomass predictions
             - loss: Scalar loss value (None if y is None)
         """
         # DINOv3 ConvNeXt expects normalized images and outputs pooled features
