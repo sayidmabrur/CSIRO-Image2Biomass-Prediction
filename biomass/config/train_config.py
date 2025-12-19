@@ -45,7 +45,7 @@ class TrainingConfig:
 
     # ========== Cross-Validation ==========
     n_folds: int = 10
-    """Number of folds for K-fold cross-validation"""
+    """Number of folds for StratifiedKFold (10 folds = 90/10 train/val split)"""
 
     seed: int = 42
     """Random seed for reproducibility"""

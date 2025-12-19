@@ -101,10 +101,10 @@ def train_one_epoch(
         optimizer.step()
 
         train_loss += loss.item()
-        train_r2_scores.append(weighted_r2(y, preds, weights).item())
+        train_r2_scores.append(weighted_r2(y, preds, weights, enforce_rules=False).item())
 
-        # Track individual R2 scores
-        r2_dict = weighted_r2_single(y, preds)
+        # Track individual R2 scores (training uses model's direct predictions)
+        r2_dict = weighted_r2_single(y, preds, enforce_rules=False)
         for target_name, r2_value in r2_dict.items():
             train_r2_individual[target_name].append(r2_value)
 
@@ -150,10 +150,10 @@ def validate_one_epoch(model, dataloader, device, weights, epoch: int, fold_idx:
             imgs, y = imgs.to(device), y.to(device)
             preds, loss = model(imgs, y)
             val_loss += loss.item()
-            val_r2_scores.append(weighted_r2(y, preds, weights).item())
+            val_r2_scores.append(weighted_r2(y, preds, weights, enforce_rules=True).item())
 
-            # Track individual R2 scores
-            r2_dict = weighted_r2_single(y, preds)
+            # Track individual R2 scores (validation enforces GDM/Total calculation rules)
+            r2_dict = weighted_r2_single(y, preds, enforce_rules=True)
             for target_name, r2_value in r2_dict.items():
                 val_r2_individual[target_name].append(r2_value)
 

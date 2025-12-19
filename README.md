@@ -11,10 +11,7 @@ Tunable Hyperparameters:
 
 # TODOS
 ---
-1. grouping K-Fold by tabular existed tabular features
-2. Added ensemble method Dinov3-convnext-LVD689m with Dinov3-ViT-sat493m
-3. Create a summary & comprehensive analysis between activation function Mish vs SiLU on this data
-4. 
+1. Added ensemble method Dinov3-convnext-LVD689m with Dinov3-ViT-sat493m
 
 # Problems & Solutions
 ---

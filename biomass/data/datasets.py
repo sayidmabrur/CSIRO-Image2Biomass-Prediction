@@ -310,7 +310,7 @@ def create_all_datasets(
 
 def create_kfold_datasets(
     dataset_path,
-    n_folds=5,
+    n_folds=10,
     groups_col_name="Species",
     seed=42,
 ):
@@ -319,7 +319,7 @@ def create_kfold_datasets(
 
     Args:
         dataset_path: Path to dataset directory
-        n_folds: Number of folds for cross-validation
+        n_folds: Number of folds for cross-validation (10 folds = 90/10 train/val split)
         groups_col_name: Column name to use for stratification (ensures proportional distribution)
         seed: Random seed for reproducibility
 
