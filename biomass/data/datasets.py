@@ -301,6 +301,12 @@ class Image2BioMassTestDataset(Dataset):
         sample_id = self.df.loc[idx, "base_sample_id"]
         return image, combined_features, sample_id
 
+def create_all_datasets(
+    dataset_path,
+    val_split=0.1,
+    seed=42
+):
+    pass
 
 def create_kfold_datasets(
     dataset_path,
