@@ -536,3 +536,111 @@ def run_cross_validation(config: TrainingConfig):
     print(f"{'=' * 80}")
 
     return all_folds_results
+
+
+
+def run_holdout_validation(config: TrainingConfig):
+    """
+    Run holdout validation training with 90:10 stratified split by Species.
+
+    This function trains on 90% of the data and validates on 10%, using
+    stratified sampling to ensure proportional species representation
+    in both train and validation sets.
+
+    Args:
+        config: Training configuration
+
+    Returns:
+        Dictionary containing training results
+    """
+    from sklearn.model_selection import StratifiedShuffleSplit
+
+    # Setup device
+    device = torch.device(config.device if torch.cuda.is_available() else "cpu")
+    print(f"\nUsing device: {device}")
+
+    # Create results directory
+    os.makedirs(config.output_dir, exist_ok=True)
+
+    # Setup wandb if enabled
+    if config.use_wandb and config.wandb_api_key:
+        os.environ["WANDB_API_KEY"] = config.wandb_api_key
+        wandb.login(key=config.wandb_api_key)
+
+    # Set seed
+    set_seed(config.seed)
+
+    # Weights for R2 calculation
+    weights = torch.tensor([0.1, 0.1, 0.1, 0.2, 0.5], device=device)
+
+    # Create base dataset to get full DataFrame and encoders
+    print("\nCreating base dataset...")
+    base_dataset = Image2BioMassTrainValDataset(
+        dataset_path=config.dataset_path,
+        img_transform=None,
+        numeric_transform=None,
+        target_transform=None,
+    )
+
+    # Get stratification labels (Species column)
+    stratify_labels = base_dataset.df[config.groups_fold_name].values
+
+    # Create 80:20 stratified split
+    print("\nCreating 80:20 stratified split by Species...")
+    splitter = StratifiedShuffleSplit(
+        n_splits=1,
+        test_size=0.2,  # 20% for validation
+        random_state=config.seed,
+    )
+
+    # Get train and validation indices
+    train_indices, val_indices = next(
+        splitter.split(range(len(base_dataset)), stratify_labels)
+    )
+    train_indices = list(train_indices)
+    val_indices = list(val_indices)
+
+    # Verify no data leakage
+    assert len(set(train_indices) & set(val_indices)) == 0, "Data leakage detected!"
+    print(f"Train samples: {len(train_indices)} (80%)")
+    print(f"Validation samples: {len(val_indices)} (20%)")
+
+    # Print species distribution
+    train_species = base_dataset.df.iloc[train_indices][config.groups_fold_name].value_counts()
+    val_species = base_dataset.df.iloc[val_indices][config.groups_fold_name].value_counts()
+    print("\nSpecies distribution:")
+    print(f"  Train: {dict(train_species)}")
+    print(f"  Val: {dict(val_species)}")
+
+    # Train using the same train_fold function (with fold_idx=0)
+    fold_results = train_fold(
+        fold_idx=0,
+        train_indices=train_indices,
+        val_indices=val_indices,
+        base_dataset=base_dataset,
+        config=config,
+        device=device,
+        weights=weights,
+    )
+
+    # Print holdout validation summary
+    print(f"\n{'=' * 80}")
+    print("HOLDOUT VALIDATION SUMMARY")
+    print(f"{'=' * 80}")
+    print(f"\nBest Validation R2: {fold_results['best_val_r2']:.4f} (epoch {fold_results['best_epoch']})")
+    print(f"Final Train R2: {fold_results['final_train_r2']:.4f}")
+    print(f"Final Val R2: {fold_results['final_val_r2']:.4f}")
+    print(f"Training Time: {fold_results['fold_time'] / 3600:.2f} hours")
+
+    print("\nPer-Target R2 (at best epoch):")
+    for target_name, r2_value in fold_results['best_val_r2_per_target'].items():
+        print(f"  {target_name}: {r2_value:.4f}")
+
+    print(f"\n{'=' * 80}")
+    print(f"Training completed!")
+    print(f"Models saved in {config.output_dir}/fold1/ directory")
+    print(f"  - best.pth (epoch {fold_results['best_epoch']})")
+    print(f"  - last.pth (epoch {config.epochs})")
+    print(f"{'=' * 80}")
+
+    return fold_results

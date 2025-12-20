@@ -70,7 +70,10 @@ class Image2BiomassModel(nn.Module):
             SwiGLU(1536, 1024),
             nn.Dropout(0.1),
             RMSNorm(1024, eps=self.eps),
-            SwiGLU(1024, 512),
+            SwiGLU(1024, 768),
+            nn.Dropout(0.1),
+            RMSNorm(768, eps=self.eps),
+            SwiGLU(768, 512),
             nn.Dropout(0.1),
             RMSNorm(512, eps=self.eps),
             SwiGLU(512, 256),
@@ -81,6 +84,7 @@ class Image2BiomassModel(nn.Module):
             RMSNorm(128, eps=self.eps),
             SwiGLU(128, 64),
             nn.Dropout(0.1),
+            RMSNorm(128, eps=self.eps),
         )
 
 
