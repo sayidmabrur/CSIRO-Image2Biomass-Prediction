@@ -623,6 +623,17 @@ def run_holdout_validation(config: TrainingConfig):
         weights=weights,
     )
 
+    # Copy best model to final_model directory
+    import shutil
+    final_model_dir = f"{config.output_dir}/final_model"
+    os.makedirs(final_model_dir, exist_ok=True)
+    
+    # Copy best.pth from fold1 to final_model
+    source_best = f"{config.output_dir}/fold1/best.pth"
+    dest_best = f"{final_model_dir}/best.pth"
+    shutil.copy2(source_best, dest_best)
+    print(f"\nCopied best model to {dest_best}")
+
     # Print holdout validation summary
     print(f"\n{'=' * 80}")
     print("HOLDOUT VALIDATION SUMMARY")
@@ -638,9 +649,8 @@ def run_holdout_validation(config: TrainingConfig):
 
     print(f"\n{'=' * 80}")
     print(f"Training completed!")
-    print(f"Models saved in {config.output_dir}/fold1/ directory")
+    print(f"Final model saved to: {dest_best}")
     print(f"  - best.pth (epoch {fold_results['best_epoch']})")
-    print(f"  - last.pth (epoch {config.epochs})")
     print(f"{'=' * 80}")
 
     return fold_results

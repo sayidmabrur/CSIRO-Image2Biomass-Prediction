@@ -54,7 +54,7 @@ class TrainingConfig:
     device: str = "cuda"
     """Device to use for training ('cuda' or 'cpu')"""
 
-    num_workers: int = 2
+    num_workers: int = 4
     """Number of worker processes for data loading"""
 
     pin_memory: bool = True

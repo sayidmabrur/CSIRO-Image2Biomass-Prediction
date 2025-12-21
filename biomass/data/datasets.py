@@ -360,12 +360,18 @@ def create_dataloaders(
     Returns:
         Tuple of (train_loader, val_loader)
     """
+    # Use persistent_workers to avoid re-spawning workers each epoch
+    # Use prefetch_factor to pre-load batches for better GPU utilization
+    persistent = num_workers > 0
+    
     train_loader = DataLoader(
         train_dataset,
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
         pin_memory=pin_memory,
+        persistent_workers=persistent,
+        prefetch_factor=2 if num_workers > 0 else None,
     )
 
     val_loader = DataLoader(
@@ -374,6 +380,8 @@ def create_dataloaders(
         shuffle=False,
         num_workers=num_workers,
         pin_memory=pin_memory,
+        persistent_workers=persistent,
+        prefetch_factor=2 if num_workers > 0 else None,
     )
 
     return train_loader, val_loader
