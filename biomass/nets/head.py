@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from dataclasses import dataclass, field
 from typing import List, Optional
-from .backbone import BackBone, BackboneConfig
+from .backbone import DINOV3Backbone, BackboneConfig
 
 
 @dataclass
@@ -74,7 +74,7 @@ class BiomassPredictor(nn.Module):
         if head_config is None:
             head_config = HeadConfig(input_dim=backbone_config.feature_dim)
 
-        self.backbone = BackBone(backbone_config)
+        self.backbone = DINOV3Backbone(backbone_config)
         self.head = MLPHead(head_config)
 
     def forward(self, x):

@@ -2,12 +2,12 @@
 Base model module for CSIRO Biomass prediction.
 """
 
-from .backbone import BackBone, BackboneConfig
+from .backbone import DINOV3Backbone, BackboneConfig
 from .head import MLPHead, HeadConfig, BiomassPredictor
 from .model import Image2BiomassModel
 
 __all__ = [
-    "BackBone",
+    "DINOV3Backbone",
     "BackboneConfig",
     "MLPHead",
     "HeadConfig",

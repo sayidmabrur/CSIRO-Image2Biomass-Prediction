@@ -4,9 +4,8 @@ Complete Image2Biomass model extracted from notebook.
 
 import torch
 import torch.nn as nn
-from transformers import AutoModel
+from biomass.nets.backbone import DINOV3Backbone
 
-from biomass.nets.layers import SwiGLU, RMSNorm
 
 class WeightedHuberLoss(nn.Module):
     """Weighted Huber Loss for biomass prediction."""
@@ -40,7 +39,7 @@ class Image2BiomassModel(nn.Module):
     - Dry_Clover_g
     - GDM_g (Green Dry Matter: should equal Dry_Green_g + Dry_Clover_g)
     - Dry_Total_g (Total Dry Matter: should equal Dry_Green_g + Dry_Dead_g + Dry_Clover_g)
-    
+
     The model learns to predict all 5 targets directly, allowing it to learn the relationships
     between component and aggregate measures in a more general way.
     """
@@ -54,43 +53,33 @@ class Image2BiomassModel(nn.Module):
         """
         super().__init__()
         # Load DINOv3 ConvNeXt Large backbone
-        self.backbone = AutoModel.from_pretrained(
-            pretrained_model_path, trust_remote_code=False
-        )
-
-        # Freeze backbone parameters
-        for param in self.backbone.parameters():
-            param.requires_grad = False
-
-        # DINOv3 ConvNeXt outputs features from pooler
-        # Tiny model = 768 dims, Large model = 1536 dims
-        # The actual dimension depends on which model is loaded
+        self.backbone = DINOV3Backbone()
         self.eps = 1e-8
         self.fc1 = nn.Sequential(
-            SwiGLU(1536, 1024),
+            nn.Linear(1536, 1024),  # dinov3 convnext large
+            nn.BatchNorm1d(1024),
+            nn.Mish(),
             nn.Dropout(0.1),
-            RMSNorm(1024, eps=self.eps),
-            SwiGLU(1024, 768),
+            nn.Linear(1024, 512),
+            nn.BatchNorm1d(512),
+            nn.Mish(),
             nn.Dropout(0.1),
-            RMSNorm(768, eps=self.eps),
-            SwiGLU(768, 512),
+            nn.Linear(512, 256),
+            nn.BatchNorm1d(256),
+            nn.Mish(),
             nn.Dropout(0.1),
-            RMSNorm(512, eps=self.eps),
-            SwiGLU(512, 256),
+            nn.Linear(256, 128),
+            nn.BatchNorm1d(128),
+            nn.Mish(),
             nn.Dropout(0.1),
-            RMSNorm(256, eps=self.eps),
-            SwiGLU(256, 128),
+            nn.Linear(128, 64),
+            nn.BatchNorm1d(64),
+            nn.Mish(),
             nn.Dropout(0.1),
-            RMSNorm(128, eps=self.eps),
-            SwiGLU(128, 64),
-            nn.Dropout(0.1),
-            RMSNorm(64, eps=self.eps),
         )
-
 
         self.out = nn.Linear(64, 5)
 
-        # self.criterion = nn.SmoothL1Loss(reduction="mean")
         self.criterion = WeightedHuberLoss(delta=1.0)
 
     def forward(self, x, y=None):
@@ -107,13 +96,9 @@ class Image2BiomassModel(nn.Module):
             - predictions: (B, 5) tensor of biomass predictions
             - loss: Scalar loss value (None if y is None)
         """
-        # DINOv3 ConvNeXt expects normalized images and outputs pooled features
-        outputs = self.backbone(x)
-        # Use the pooler_output which is the global representation (1536-dim for ConvNeXt Large)
-        x = outputs.pooler_output
 
+        x = self.backbone(x)
         x = self.fc1(x)
-
         preds = self.out(x)
 
         loss = None
