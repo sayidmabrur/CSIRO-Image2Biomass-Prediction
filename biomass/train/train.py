@@ -101,10 +101,10 @@ def train_one_epoch(
         optimizer.step()
 
         train_loss += loss.item()
-        train_r2_scores.append(weighted_r2(y, preds, weights, enforce_rules=False).item())
+        train_r2_scores.append(weighted_r2(y, preds, weights).item())
 
         # Track individual R2 scores (training uses model's direct predictions)
-        r2_dict = weighted_r2_single(y, preds, enforce_rules=False)
+        r2_dict = weighted_r2_single(y, preds)
         for target_name, r2_value in r2_dict.items():
             train_r2_individual[target_name].append(r2_value)
 
@@ -241,7 +241,7 @@ def train_fold(
 
     # Initialize NEW model for this fold (critical for K-Fold!)
     print("Loading backbone model (DINOv3 ConvNeXt Large)...")
-    model = Image2BiomassModel(config.pretrained_model_path).to(device)
+    model = Image2BiomassModel().to(device)
     print("Model loaded and moved to device")
     print("Initializing optimizer...")
     optimizer = torch.optim.AdamW(

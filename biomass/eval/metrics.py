@@ -37,6 +37,8 @@ def weighted_r2(
     Returns:
         Weighted mean R2 score.
     """
+    # print("y_true batch:", y_true)
+    # print("y_pred batch:", y_pred)
     if weights is None:
         # Default weights from the notebook
         weights = torch.tensor([0.1, 0.1, 0.1, 0.2, 0.5], device=y_true.device)
@@ -44,6 +46,9 @@ def weighted_r2(
     # Apply inverse log transform
     y_true = target_untransform(y_true)
     y_pred = target_untransform(y_pred)
+    # print("y_true after untransform:", y_true)
+    # print("y_true after untransform:", y_pred)
+    
 
     # Model predicts all 5 targets:
     # [0] = Dry_Green_g, [1] = Dry_Dead_g, [2] = Dry_Clover_g
@@ -97,11 +102,11 @@ def weighted_r2_single(y_true: torch.Tensor, y_pred: torch.Tensor, enforce_rules
         y_pred = torch.cat([y_pred[:, :3], gdm_pred, tot_pred], dim=1)
 
     # compute R2 for each target separately
-    mean = y_true.mean(dim=0)  # (5,)
-    SSE = ((y_true - y_pred) ** 2).sum(dim=0)  # (5,)
-    TSS = ((y_true - mean) ** 2).sum(dim=0)  # (5,)
+    mean = y_true.mean(dim=0)
+    SSE = ((y_true - y_pred) ** 2).sum(dim=0)
+    TSS = ((y_true - mean) ** 2).sum(dim=0)
     TSS = torch.clamp(TSS, min=1e-8)
-    R2 = 1 - SSE / TSS  # (5,)
+    R2 = 1 - SSE / TSS
     R2 = torch.clamp(R2, min=-10, max=1)
 
     target_labels = [

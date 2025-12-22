@@ -44,7 +44,7 @@ class Image2BiomassModel(nn.Module):
     between component and aggregate measures in a more general way.
     """
 
-    def __init__(self, pretrained_model_path: str = None):
+    def __init__(self):
         """
         Initialize the model.
 
@@ -76,11 +76,20 @@ class Image2BiomassModel(nn.Module):
             nn.BatchNorm1d(64),
             nn.Mish(),
             nn.Dropout(0.1),
+            nn.Linear(64, 32),
+            nn.BatchNorm1d(32),
+            nn.Mish(),
+            nn.Dropout(0.1),
+            nn.Linear(32, 16),
+            nn.BatchNorm1d(16),
+            nn.Mish(),
+            nn.Dropout(0.1),
         )
 
-        self.out = nn.Linear(64, 5)
+        self.out = nn.Linear(16, 3)
 
-        self.criterion = WeightedHuberLoss(delta=1.0)
+        # self.criterion = WeightedHuberLoss(delta=1.0)
+        self.criterion = nn.SmoothL1Loss()
 
     def forward(self, x, y=None):
         """
@@ -103,6 +112,7 @@ class Image2BiomassModel(nn.Module):
 
         loss = None
         if y is not None:
+            y = y[:, :3]
             loss = self.criterion(preds, y)
 
         return preds, loss

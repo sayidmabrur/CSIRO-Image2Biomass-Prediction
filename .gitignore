@@ -19,3 +19,5 @@ __pycache__/
 train_results/
 
 .env
+
+train_results_Biomassv1/

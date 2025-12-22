@@ -17,7 +17,7 @@ class DataConfig:
     imagenet_std = (0.229, 0.224, 0.225)
 
     # Dataloader settings
-    batch_size = 16
+    batch_size = 8
     num_workers = 4
     pin_memory = True
 
@@ -26,7 +26,7 @@ class DataConfig:
     random_seed = 42
 
     # Augmentation settings (for reference, actual transforms in augmentations.py)
-    train_resize = (256, 256)  # Larger size for random crop
+    train_resize = (512, 512)  # Larger size for random crop
     train_crop_scale = (0.75, 1.0)
     train_crop_ratio = (0.9, 1.1)
 

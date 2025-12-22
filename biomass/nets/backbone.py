@@ -17,11 +17,9 @@ class BackboneConfig:
         num_channels (int): Number of input channels (default: 3 for RGB)
     """
 
-    pretrained_model_path: str = "pretrained/dinov3-convnext-tiny-pretrain-lvd1689m"
-    feature_dim: int = 768
+    pretrained_model_path: str = "pretrained/dinov3-convnext-large-pretrain-lvd1689m"
+    feature_dim: int = 1536
     freeze_backbone: bool = False
-    image_size: int = 224
-    num_channels: int = 3
 
 
 class DINOV3Backbone(nn.Module):
