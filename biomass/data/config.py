@@ -9,7 +9,7 @@ class DataConfig:
     """Configuration for dataset and dataloader parameters."""
 
     # Image settings
-    img_size = (224, 224)
+    img_size = (512, 512)
     dtype = torch.float32
 
     # ImageNet normalization statistics
@@ -26,7 +26,6 @@ class DataConfig:
     random_seed = 42
 
     # Augmentation settings (for reference, actual transforms in augmentations.py)
-    train_resize = (512, 512)  # Larger size for random crop
     train_crop_scale = (0.75, 1.0)
     train_crop_ratio = (0.9, 1.1)
 

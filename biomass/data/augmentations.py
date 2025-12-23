@@ -15,7 +15,7 @@ train_transform = v2.Compose(
     [
         v2.ToImage(),
         v2.ToDtype(config.dtype, scale=True),
-        v2.Resize(config.train_resize),  # Larger for cropping
+        v2.Resize(config.img_size),  # Larger for cropping
         # Geometric augmentations
         v2.RandomHorizontalFlip(p=0.5),
         v2.RandomVerticalFlip(p=0.5),
