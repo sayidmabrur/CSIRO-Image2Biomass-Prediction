@@ -19,31 +19,31 @@ train_transform = v2.Compose(
         # Geometric augmentations
         v2.RandomHorizontalFlip(p=0.5),
         v2.RandomVerticalFlip(p=0.5),
-        v2.RandomRotation(180, interpolation=v2.InterpolationMode.BILINEAR),
-        v2.RandomAffine(
-            degrees=0,
-            translate=(0.1, 0.1),
-            scale=(0.85, 1.15),
-            shear=10,
-            interpolation=v2.InterpolationMode.BILINEAR,
-        ),
-        v2.RandomResizedCrop(
-            size=config.img_size,
-            scale=config.train_crop_scale,
-            ratio=config.train_crop_ratio,
-            interpolation=v2.InterpolationMode.BILINEAR,
-        ),
-        # Color augmentations
-        v2.ColorJitter(
-            brightness=config.brightness,
-            contrast=config.contrast,
-            saturation=config.saturation,
-            hue=config.hue,
-        ),
-        v2.RandomApply([v2.GaussianBlur(kernel_size=5, sigma=(0.1, 2.0))], p=0.3),
-        v2.RandomAdjustSharpness(sharpness_factor=2, p=0.3),
-        v2.RandomAutocontrast(p=0.2),
-        v2.RandomGrayscale(p=0.05),
+        # v2.RandomRotation(180, interpolation=v2.InterpolationMode.BILINEAR),
+        # v2.RandomAffine(
+        #     degrees=0,
+        #     translate=(0.1, 0.1),
+        #     scale=(0.85, 1.15),
+        #     shear=10,
+        #     interpolation=v2.InterpolationMode.BILINEAR,
+        # ),
+        # v2.RandomResizedCrop(
+        #     size=config.img_size,
+        #     scale=config.train_crop_scale,
+        #     ratio=config.train_crop_ratio,
+        #     interpolation=v2.InterpolationMode.BILINEAR,
+        # ),
+        # # Color augmentations
+        # v2.ColorJitter(
+        #     brightness=config.brightness,
+        #     contrast=config.contrast,
+        #     saturation=config.saturation,
+        #     hue=config.hue,
+        # ),
+        # v2.RandomApply([v2.GaussianBlur(kernel_size=5, sigma=(0.1, 2.0))], p=0.3),
+        # v2.RandomAdjustSharpness(sharpness_factor=2, p=0.3),
+        # v2.RandomAutocontrast(p=0.2),
+        # v2.RandomGrayscale(p=0.05),
         v2.Normalize(
             mean=config.imagenet_mean,
             std=config.imagenet_std,

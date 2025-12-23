@@ -19,7 +19,7 @@ class BackboneConfig:
 
     pretrained_model_path: str = "pretrained/dinov3-convnext-large-pretrain-lvd1689m"
     feature_dim: int = 1536
-    freeze_backbone: bool = False
+    freeze_backbone: bool = True
 
 
 class DINOV3Backbone(nn.Module):
