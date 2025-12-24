@@ -109,6 +109,7 @@ class Image2BiomassModel(nn.Module):
         x = self.backbone(x)
         x = self.fc1(x)
         preds = self.out(x)
+        preds = torch.nn.functional.softplus(preds)
 
         loss = None
         if y is not None:
