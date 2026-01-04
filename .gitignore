@@ -5,7 +5,8 @@ venvs
 .venvs
 dinov2/
 wandb/
-
+.venv2/
+submission/
 
 image2biomass_weights_resnet50.pth
 
