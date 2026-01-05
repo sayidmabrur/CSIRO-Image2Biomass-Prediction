@@ -56,37 +56,17 @@ class Image2BiomassModel(nn.Module):
         self.backbone = DINOV3Backbone()
         self.eps = 1e-8
         self.fc1 = nn.Sequential(
-            nn.Linear(1536, 1024),  # dinov3 convnext large
+            nn.Linear(1536, 1536, bias=False),  # dinov3 convnext large
+            nn.BatchNorm1d(1536),
+            nn.Mish(),
+            nn.Dropout(0.1),
+            nn.Linear(1536, 1024, bias=False),  # dinov3 convnext large
             nn.BatchNorm1d(1024),
-            nn.Mish(),
-            nn.Dropout(0.1),
-            nn.Linear(1024, 512),
-            nn.BatchNorm1d(512),
-            nn.Mish(),
-            nn.Dropout(0.1),
-            nn.Linear(512, 256),
-            nn.BatchNorm1d(256),
-            nn.Mish(),
-            nn.Dropout(0.1),
-            nn.Linear(256, 128),
-            nn.BatchNorm1d(128),
-            nn.Mish(),
-            nn.Dropout(0.1),
-            nn.Linear(128, 64),
-            nn.BatchNorm1d(64),
-            nn.Mish(),
-            nn.Dropout(0.1),
-            nn.Linear(64, 32),
-            nn.BatchNorm1d(32),
-            nn.Mish(),
-            nn.Dropout(0.1),
-            nn.Linear(32, 16),
-            nn.BatchNorm1d(16),
             nn.Mish(),
             nn.Dropout(0.1),
         )
 
-        self.out = nn.Linear(16, 3)
+        self.out = nn.Linear(1024, 3, bias=True)
 
         # self.criterion = WeightedHuberLoss(delta=1.0)
         self.criterion = nn.SmoothL1Loss()

@@ -31,10 +31,10 @@ class TrainingConfig:
     batch_size: int = 16
     """Batch size for training and validation"""
 
-    learning_rate: float = 1e-2
+    learning_rate: float = 1e-4
     """Learning rate for AdamW optimizer"""
 
-    weight_decay: float = 1e-2
+    weight_decay: float = 1e-3
     """Weight decay for AdamW optimizer"""
 
     l1_lambda: float = 1e-7
